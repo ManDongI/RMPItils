@@ -7,6 +7,7 @@ export default class StructuredPacket {
 
     decode() {
         this.wbuf.reset();
+        //
     }
 
     encode() {
@@ -28,5 +29,9 @@ export default class StructuredPacket {
         let newBuf = Buffer.alloc(this.getEstimatedSize());
         this.wbuf.copy(newBuf, 0);
         this.wbuf = new WrappedBuffer(newBuf);
+    }
+
+    getRawData() {
+        return this.wbuf.getNaked();
     }
 }
