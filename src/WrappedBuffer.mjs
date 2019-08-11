@@ -44,7 +44,7 @@ const WrappedBuffer = new Proxy(class _ extends Buffer {}, {
             },
             read(len, offset = this.offset) {
                 this.offset = offset;
-                checkOffset(len);
+                this.checkOffset(len);
                 return Uint8Array.prototype.slice.call(this, this.offset, this.offset += len);
             },
             readLByteArray(offset = this.offset) {
