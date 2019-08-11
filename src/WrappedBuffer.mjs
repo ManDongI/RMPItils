@@ -22,7 +22,9 @@ const IO_TABLES = {
     UInt32BE: 4,
     UInt32LE: 4,
     UIntBE: 0,
-    UIntLE: 0
+    UIntLE: 0,
+    LByteArray: 0,
+    LString: 0
 };
 
 const IO_MARKER = /^(?:read|write)(.*)$/;
@@ -45,7 +47,7 @@ const WrappedBuffer = new Proxy(class _ extends Buffer {}, {
             read(len, offset = this.offset) {
                 this.offset = offset;
                 this.checkOffset(len);
-                return Uint8Array.prototype.slice.call(this, this.offset, this.offset += len);
+                return Uint8Array.prototype.slice.call(buf, this.offset, this.offset += len);
             },
             readLByteArray(offset = this.offset) {
                 return this.read(this.readUInt32LE(offset));
@@ -53,11 +55,44 @@ const WrappedBuffer = new Proxy(class _ extends Buffer {}, {
             readLString(offset = this.offset) {
                 return this.readLByteArray(offset).toString('utf8');
             },
+            readLArray(type, offset = this.offset) {
+                if (!IO_TABLES.hasOwnProperty(type))
+                    throw new ReferenceError('Invalid typed array');
+                let len = this.readUInt32LE(offset);
+                let readMethod = `read${type}`;
+                let tmp = [];
+                for (let i = 0; i < len; i++) tmp.push(this[readMethod]());
+                return tmp;
+            },
+            writeAlternative(value, len, offset = this.offset) {
+                this.offset = offset;
+                this.checkOffset(len);
+                value.copy(buf, this.offset, 0, len);
+                this.offset += len;
+            },
+            writeLByteArray(value, offset = this.offset) {
+                this.writeUInt32LE(value.length, offset);
+                this.writeAlternative(value, value.length);
+            },
+            writeLString(value, offset = this.offset) {
+                this.writeLByteArray(Buffer.from(value, 'utf8'), offset);
+            },
+            writeLArray(value, type, offset = this.offset) {
+                if (!IO_TABLES.hasOwnProperty(type))
+                    throw new ReferenceError('Invalid typed array');
+                let len = value.length;
+                let writeMethod = `write${type}`;
+                this.writeUInt32LE(len, offset);
+                for (let i = 0; i < len; i++) this[writeMethod](value[i]);
+            },
             getOffset() {
                 return this.offset;
             },
             setOffset(offset) {
                 this.offset = offset;
+            },
+            getNaked() {
+                return buf;
             }
         };
         return new Proxy(buf, {
@@ -109,9 +144,10 @@ const WrappedBuffer = new Proxy(class _ extends Buffer {}, {
             },
             set(target, propertyKey, value, receiver) {
                 if (propertyKey === 'offset')
-                    return extension.offset = value;
+                    extension.offset = value;
                 else
-                    return target[propertyKey] = value;
+                    target[propertyKey] = value;
+                return true;
             },
             getPrototypeOf(target) {
                 return WrappedBuffer.prototype;

@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Node utils",
   "main": "src/rmpitils.mjs",
-  "scripts": {},
+  "scripts": {
+    "test": "node --experimental-modules .\\test\\packetTestNaive.mjs"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/ManDongI/rmpitils.git"
