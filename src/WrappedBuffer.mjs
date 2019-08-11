@@ -62,8 +62,13 @@ const WrappedBuffer = new Proxy(class _ extends Buffer {}, {
         };
         return new Proxy(buf, {
             get(target, property, receiver) {
-                if (typeof property === 'symbol')
-                    return Reflect.get(target, property, receiver);
+                if (typeof property === 'symbol') {
+                    let val = target[property];
+                    if (val instanceof Function)
+                        val = val.bind(target);
+                    return val;
+                }
+
                 if (extension.hasOwnProperty(property))
                     return Reflect.get(extension, property, receiver);
                 if (property === 'write')
@@ -76,8 +81,14 @@ const WrappedBuffer = new Proxy(class _ extends Buffer {}, {
                         extension.offset += args[0].length;
                         return target.write(...args);
                     };
-                if (!IO_MARKER.test(property))
-                    return target[property];
+
+                if (!IO_MARKER.test(property)) {
+                    let val = target[property];
+                    if (val instanceof Function)
+                        val = val.bind(target);
+                    return val;
+                }
+
                 if (!IO_TABLES.hasOwnProperty(IO_MARKER.exec(property)[1]))
                     throw new ReferenceError('Invalid method called');
                 let offsetPosition = Number(property.startsWith('write'));
