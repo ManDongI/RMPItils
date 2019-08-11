@@ -1,6 +1,8 @@
 import WrappedBuffer from './WrappedBuffer.mjs';
 
 export default class StructuredPacket {
+    static id = 0;
+
     constructor(wbuf) {
         this.wbuf = wbuf;
     }
@@ -32,6 +34,6 @@ export default class StructuredPacket {
     }
 
     getRawData() {
-        return this.wbuf.getNaked();
+        return Buffer.concat([ Buffer.from([ this.constructor.id ]), this.wbuf.getNaked() ]); // Too expensive
     }
 }

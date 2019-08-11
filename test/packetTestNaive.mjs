@@ -2,6 +2,7 @@ import StructuredPacket from '../src/StructuredPacket.mjs';
 import WrappedBuffer from '../src/WrappedBuffer.mjs';
 
 class StringArrayPacket extends StructuredPacket {
+    static id = 100;
     strArr = [];
 
     decode() {
@@ -31,3 +32,4 @@ testPacket.strArr = original;
 testPacket.encode();
 testPacket.decode();
 console.assert(testPacket.strArr.every((e, i) => original[i] === e));
+console.log(testPacket.getRawData());
