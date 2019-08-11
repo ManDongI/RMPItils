@@ -1,0 +1,21 @@
+{
+  "name": "rmpitils",
+  "version": "1.0.0",
+  "description": "Node utils",
+  "main": "src/rmpitils.mjs",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ManDongI/rmpitils.git"
+  },
+  "keywords": [
+    "util",
+    "utils"
+  ],
+  "author": "ManDongI",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ManDongI/rmpitils/issues"
+  },
+  "homepage": "https://github.com/ManDongI/rmpitils#readme"
+}
