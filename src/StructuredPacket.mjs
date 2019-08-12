@@ -1,10 +1,15 @@
 import WrappedBuffer from './WrappedBuffer.mjs';
 
 export default class StructuredPacket {
-    static id = 0;
+    static id = 0; // reserved
 
-    constructor(wbuf) {
-        this.wbuf = wbuf;
+    #buf;
+
+    constructor(buf) {
+        if (buf.length < 1)
+            throw new RangeError('Cannot write id');
+        this.#buf = buf;
+        this.wbuf = new WrappedBuffer(buf.subarray(1));
     }
 
     decode() {
@@ -13,6 +18,7 @@ export default class StructuredPacket {
     }
 
     encode() {
+        this.#buf[0] = this.constructor.id;
         this.wbuf.reset();
         this.grow();
     }
@@ -25,15 +31,16 @@ export default class StructuredPacket {
         return 0;
     }
 
-    grow() {
-        if (this.getEstimatedSize() <= this.getRealSize())
+    grow(size = this.getEstimatedSize()) {
+        if (size <= this.getRealSize())
             return;
-        let newBuf = Buffer.alloc(this.getEstimatedSize());
-        this.wbuf.copy(newBuf, 0);
-        this.wbuf = new WrappedBuffer(newBuf);
+        let newBuf = Buffer.alloc(size + 1);
+        this.#buf.copy(newBuf, 0);
+        this.#buf = newBuf;
+        this.wbuf = new WrappedBuffer(newBuf.subarray(1));
     }
 
     getRawData() {
-        return Buffer.concat([ Buffer.from([ this.constructor.id ]), this.wbuf.getNaked() ]); // Too expensive
+        return this.#buf;
     }
 }

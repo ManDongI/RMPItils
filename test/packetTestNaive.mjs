@@ -3,6 +3,7 @@ import WrappedBuffer from '../src/WrappedBuffer.mjs';
 
 class StringArrayPacket extends StructuredPacket {
     static id = 100;
+
     strArr = [];
 
     decode() {
@@ -22,13 +23,16 @@ class StringArrayPacket extends StructuredPacket {
 }
 
 let original = ['Hello', 'World!'];
-let helloWorld = new WrappedBuffer(Buffer.alloc(35));
+let originalBuf = Buffer.alloc(36);
+originalBuf[0] = 99; // weird
+let helloWorld = new WrappedBuffer(originalBuf.subarray(1));
 helloWorld.writeLArray(original, 'LString');
-let testPacket = new StringArrayPacket(helloWorld);
+let testPacket = new StringArrayPacket(originalBuf);
 testPacket.decode();
 console.assert(testPacket.strArr.every((e, i) => original[i] === e));
 original = ['Hello12332142345235', 'World3847238457923874892374'];
 testPacket.strArr = original;
+console.log(testPacket.getEstimatedSize(), testPacket.getRealSize());
 testPacket.encode();
 testPacket.decode();
 console.assert(testPacket.strArr.every((e, i) => original[i] === e));
