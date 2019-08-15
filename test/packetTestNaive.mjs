@@ -17,13 +17,13 @@ class StringArrayPacket extends StructuredPacket {
     }
 
     getEstimatedSize() {
-        return this.strArr.map(e => Buffer.from(e, 'utf8').length)
-            .reduce((a, b) => a + b) + 8 * this.strArr.length;
+        return 4 + this.strArr.map(e => Buffer.from(e, 'utf8').length)
+            .reduce((a, b) => a + b) + 4 * this.strArr.length;
     }
 }
 
 let original = ['Hello', 'World!'];
-let originalBuf = Buffer.alloc(36);
+let originalBuf = Buffer.alloc(24);
 originalBuf[0] = 99; // weird
 let helloWorld = new WrappedBuffer(originalBuf.subarray(1));
 helloWorld.writeLArray(original, 'LString');

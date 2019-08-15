@@ -41,7 +41,7 @@ const WrappedBuffer = new Proxy(class _ extends Buffer {}, {
                 this.offset = 0;
             },
             checkOffset(len) {
-                if (this.offset + len >= this.length)
+                if (this.offset + len > this.length)
                     throw new RangeError(`Offset out of range: ${this.offset + len}`);
             },
             read(len, offset = this.offset) {
